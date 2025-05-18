@@ -24,6 +24,7 @@ const axesCheckbox = document.getElementById('axes-checkbox')
 const modelUploader = document.getElementById('model-uploader')
 const wireframeCheckbox = document.getElementById('wireframe-checkbox')
 const resetCameraButton = document.getElementById('camreset-button')
+const uploadButton = document.getElementById('upload-button')
 
 
 // Load Three.js
@@ -248,6 +249,7 @@ window.addEventListener('resize', () => {
 gridCheckbox.addEventListener('change', () => {
     frontGrid.visible = gridCheckbox.checked
     horizontalGrid.visible = gridCheckbox.checked // Disable horizontal grid as well
+    sideGrid.visible = gridCheckbox.checked
 })
 axesCheckbox.addEventListener('change', () => {
     axesHelper.visible = axesCheckbox.checked
@@ -265,6 +267,10 @@ resetCameraButton.addEventListener('click', () => {
     camera.lookAt(new THREE.Vector3(0, 0, 0))
     controls.update()
 })
+uploadButton.addEventListener('click', () => {
+    modelUploader.click()
+})
+
 
 // Animation loop
 function animate() {
