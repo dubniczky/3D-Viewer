@@ -1,3 +1,5 @@
+'use strict'
+
 // Settings
 const gridSize = 50 // Unit size for both directions
 const gridDivisions = 50 // Number of divisions in both directions
@@ -5,7 +7,7 @@ const gridColor = 0x444444 // Dark gray color for the grid lines
 const backgroundColor = 0x2e2e2e // Dark gray window clear color
 const lightColor = 0xffffff // White color for the light
 const modelMeshColor = 0x808080 // Light gray color for the model mesh
-const defaultCameraPosition = [0, 0, 10]
+const defaultCameraPosition = [0, 0, 5]
 const diffuseLightDirection = [1, 1, 1]
 
 
@@ -20,6 +22,7 @@ const welcomeMessageContainer = document.getElementById('welcome-message')
 const gridCheckbox = document.getElementById('grid-checkbox')
 const axesCheckbox = document.getElementById('axes-checkbox')
 const modelUploader = document.getElementById('model-uploader')
+const wireframeCheckbox = document.getElementById('wireframe-checkbox')
 
 
 // Load Three.js
@@ -247,6 +250,13 @@ gridCheckbox.addEventListener('change', () => {
 })
 axesCheckbox.addEventListener('change', () => {
     axesHelper.visible = axesCheckbox.checked
+})
+wireframeCheckbox.addEventListener('change', () => {
+    scene.traverse((child) => {
+        if (child.isMesh) {
+            child.material.wireframe = wireframeCheckbox.checked
+        }
+    })
 })
 
 
