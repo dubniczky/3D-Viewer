@@ -15,6 +15,9 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Set the background color to dark gray
+renderer.setClearColor(0x2e2e2e); // Dark gray color
+
 // Add lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Intensity set to 1.5 for brightness
 scene.add(ambientLight);
@@ -79,6 +82,40 @@ renderer.domElement.addEventListener('drop', (event) => {
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
+
+// Add a grid helper to the scene
+const gridHelper = new THREE.GridHelper(50, 50); // Size 50, divisions 50
+scene.add(gridHelper);
+
+// Create a static grid as a background
+const gridBackground = new THREE.GridHelper(50, 50, 0x444444, 0x444444); // Dark gray grid
+gridBackground.rotation.x = Math.PI / 2; // Rotate to lie flat on the background
+scene.add(gridBackground);
+
+// Add a sidebar with a checkbox to toggle the grid
+const sidebar = document.createElement('div');
+sidebar.style.position = 'absolute';
+sidebar.style.top = '10px';
+sidebar.style.left = '10px';
+sidebar.style.padding = '10px';
+sidebar.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+sidebar.style.borderRadius = '5px';
+sidebar.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+
+const gridCheckbox = document.createElement('input');
+gridCheckbox.type = 'checkbox';
+gridCheckbox.checked = true;
+const gridLabel = document.createElement('label');
+gridLabel.textContent = ' Show Grid';
+gridLabel.style.marginLeft = '5px';
+
+gridCheckbox.addEventListener('change', () => {
+    gridBackground.visible = gridCheckbox.checked;
+});
+
+sidebar.appendChild(gridCheckbox);
+sidebar.appendChild(gridLabel);
+document.body.appendChild(sidebar);
 
 // Handle window resizing
 window.addEventListener('resize', () => {
