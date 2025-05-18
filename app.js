@@ -2,9 +2,10 @@
 
 // Include Three.js via a script tag in your HTML file:
 // <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-// Also include the STLLoader and OBJLoader scripts:
+// Also include the STLLoader, OBJLoader, and ThreeMFLoader scripts:
 // <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/STLLoader.js"></script>
 // <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/OBJLoader.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/3MFLoader.js"></script>
 
 const gridSize = 50 // Unit size for both directions
 const gridDivisions = 50 // Number of divisions in both directions
@@ -48,6 +49,7 @@ controls.maxDistance = 100; // Set maximum zoom distance
 // Add drag-and-drop functionality
 const loader = new THREE.STLLoader();
 const objLoader = new THREE.OBJLoader();
+const threeMFLoader = new THREE.ThreeMFLoader();
 
 const welcomeMessageContainer = document.getElementById('welcome-message');
 
@@ -97,8 +99,44 @@ renderer.domElement.addEventListener('drop', (event) => {
             camera.lookAt(obj.position);
         };
         reader.readAsText(file);
+    } else if (file && file.name.endsWith('.3mf')) {
+        welcomeMessageContainer.style.display = 'none'; // Hide the welcome message when a file is loaded
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const object = threeMFLoader.parse(e.target.result);
+
+            // Create a new group to hold the object
+            const group = new THREE.Group();
+            group.add(object);
+
+            // Compute bounding box for the entire group
+            const box = new THREE.Box3().setFromObject(group);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+
+            // Scale the group to fit within a 5-unit cube
+            const maxDimension = Math.max(size.x, size.y, size.z);
+            const scaleFactor = 5 / maxDimension;
+            group.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+            // Recompute the bounding box after scaling
+            box.setFromObject(group);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+
+            // Center the group by adjusting its position
+            group.position.sub(center);
+
+            // Add the group to the scene
+            scene.add(group);
+
+            // Adjust the camera to focus on the group
+            camera.position.set(0, 0, 10);
+            camera.lookAt(new THREE.Vector3(0, 0, 0)); // Look at the origin
+        };
+        reader.readAsArrayBuffer(file);
     } else {
-        alert('Please drop a valid STL or OBJ file.');
+        alert('Please drop a valid STL, OBJ, or 3MF file.');
     }
 });
 
@@ -108,7 +146,7 @@ renderer.domElement.addEventListener('click', () => {
     }
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.stl, .obj';
+    input.accept = '.stl, .obj, .3mf';
     input.style.display = 'none';
     document.body.appendChild(input);
     input.click();
@@ -152,8 +190,34 @@ renderer.domElement.addEventListener('click', () => {
                 camera.lookAt(obj.position);
             };
             reader.readAsText(file);
+        } else if (file && file.name.endsWith('.3mf')) {
+            welcomeMessageContainer.style.display = 'none'; // Hide the message when a file is loaded
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const object = threeMFLoader.parse(e.target.result);
+
+                // Compute bounding box
+                const box = new THREE.Box3().setFromObject(object);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+
+                // Scale the object to fit within a 5-unit cube
+                const maxDimension = Math.max(size.x, size.y, size.z);
+                const scaleFactor = 5 / maxDimension;
+                object.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                // Center the object
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+                object.position.sub(center);
+
+                scene.add(object);
+                camera.position.set(0, 0, 10);
+                camera.lookAt(object.position);
+            };
+            reader.readAsArrayBuffer(file);
         } else {
-            alert('Please select a valid STL or OBJ file.');
+            alert('Please select a valid STL, OBJ, or 3MF file.');
         }
         document.body.removeChild(input);
     });
