@@ -27,6 +27,14 @@ scene.add(light);
 // Set up the camera position
 camera.position.z = 5;
 
+// Add OrbitControls for mouse interaction
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // Enable smooth damping effect
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false; // Disable panning
+controls.minDistance = 1; // Set minimum zoom distance
+controls.maxDistance = 100; // Set maximum zoom distance
+
 // Add drag-and-drop functionality
 const loader = new THREE.STLLoader();
 renderer.domElement.addEventListener('dragover', (event) => {
@@ -72,8 +80,6 @@ renderer.domElement.addEventListener('drop', (event) => {
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 
-
-
 // Handle window resizing
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -84,6 +90,7 @@ window.addEventListener('resize', () => {
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
+    controls.update(); // Update controls
     renderer.render(scene, camera);
 }
 animate();
