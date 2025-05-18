@@ -1,134 +1,195 @@
+// Settings
 const gridSize = 50 // Unit size for both directions
 const gridDivisions = 50 // Number of divisions in both directions
 const gridColor = 0x444444 // Dark gray color for the grid lines
+const backgroundColor = 0x2e2e2e // Dark gray window clear color
+const lightColor = 0xffffff // White color for the light
+const defaultCameraPosition = [0, 0, 10]
+const diffuseLightDirection = [1, 1, 1]
 
+
+// State
 let modelLoaded = false
+let ambientLightIntensity = 1.0
+let diffuseLightIntensity = 1.5
 
-document.body.style.margin = 0;
-document.body.style.overflow = 'hidden';
 
-// Create the scene, camera, and renderer
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+// Load controls
+const welcomeMessageContainer = document.getElementById('welcome-message')
+const gridCheckbox = document.getElementById('grid-checkbox')
+const axesCheckbox = document.getElementById('axes-checkbox')
 
-// Set the background color to dark gray
-renderer.setClearColor(0x2e2e2e); // Dark gray color
+
+// Load Three.js
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+const renderer = new THREE.WebGLRenderer()
+renderer.setSize(window.innerWidth, window.innerHeight)
+document.body.appendChild(renderer.domElement)
+renderer.setClearColor(backgroundColor)
+camera.position.set(...defaultCameraPosition)
 
 // Add lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Intensity set to 1.5 for brightness
-scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight(lightColor, ambientLightIntensity)
+scene.add(ambientLight)
+const diffuseLight = new THREE.DirectionalLight(lightColor, diffuseLightIntensity)
+diffuseLight.position.set(...diffuseLightDirection).normalize()
+scene.add(diffuseLight)
 
-// Increase the intensity of the directional light
-const light = new THREE.DirectionalLight(0xffffff, 2); // Intensity set to 2 for stronger light
-light.position.set(1, 1, 1).normalize();
-scene.add(light);
 
-// Set up the camera position
-camera.position.z = 5;
-
-// Add OrbitControls for mouse interaction
+// Add orbit controls for camera movement
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Enable smooth damping effect
-controls.dampingFactor = 0.05;
-controls.screenSpacePanning = false; // Disable panning
-controls.minDistance = 1; // Set minimum zoom distance
-controls.maxDistance = 100; // Set maximum zoom distance
+controls.enableDamping = true
+controls.dampingFactor = 0.1
+controls.screenSpacePanning = false
+controls.minDistance = 1 // minimum zoom distance
+controls.maxDistance = 100 // maximum zoom distance
 
-// Add drag-and-drop functionality
-const loader = new THREE.STLLoader();
-const objLoader = new THREE.OBJLoader();
-const threeMFLoader = new THREE.ThreeMFLoader();
 
-const welcomeMessageContainer = document.getElementById('welcome-message');
+// Set up loaders
+const loaders = {
+    'obj': new THREE.OBJLoader(),
+    'stl': new THREE.STLLoader(),
+    '3mf': new THREE.ThreeMFLoader()
+}
+
 
 renderer.domElement.addEventListener('dragover', (event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
-});
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+})
 
-renderer.domElement.addEventListener('drop', (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file && file.name.endsWith('.stl')) {
-        welcomeMessageContainer.style.display = 'none'; // Hide the welcome message when a file is loaded
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const geometry = loader.parse(e.target.result);
-            geometry.computeBoundingBox();
-            const bbox = geometry.boundingBox;
+function loadStlGeometry(geometry) {
+    geometry.computeBoundingBox();
+    const bbox = geometry.boundingBox;
+    const size = new THREE.Vector3();
+    bbox.getSize(size);
+
+    const maxDimension = Math.max(size.x, size.y, size.z);
+    const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
+    geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+
+    const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    // Center the geometry
+    const center = new THREE.Vector3();
+    bbox.getCenter(center);
+    geometry.translate(-center.x, -center.y, -center.z);
+
+    camera.position.set(0, 0, 10);
+    camera.lookAt(mesh.position);
+}
+
+function loadObjGeometry(geometry) {
+    geometry.traverse((child) => {
+        if (child.isMesh) {
+            child.geometry.computeBoundingBox();
+            const bbox = child.geometry.boundingBox;
             const size = new THREE.Vector3();
             bbox.getSize(size);
 
             const maxDimension = Math.max(size.x, size.y, size.z);
             const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
-            geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+            child.geometry.scale(scaleFactor, scaleFactor, scaleFactor);
 
             const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
-            const mesh = new THREE.Mesh(geometry, material);
+            const mesh = new THREE.Mesh(child.geometry, material);
             scene.add(mesh);
 
             // Center the geometry
             const center = new THREE.Vector3();
             bbox.getCenter(center);
-            geometry.translate(-center.x, -center.y, -center.z);
+            child.geometry.translate(-center.x, -center.y, -center.z);
 
             camera.position.set(0, 0, 10);
             camera.lookAt(mesh.position);
-            console.log('Mesh added with scale and center adjustments:', mesh); 
-        };
-        reader.readAsArrayBuffer(file);
-    } else if (file && file.name.endsWith('.obj')) {
-        welcomeMessageContainer.style.display = 'none'; // Hide the welcome message when a file is loaded
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const obj = objLoader.parse(e.target.result);
-            scene.add(obj);
-            camera.position.set(0, 0, 10);
-            camera.lookAt(obj.position);
-        };
-        reader.readAsText(file);
-    } else if (file && file.name.endsWith('.3mf')) {
-        welcomeMessageContainer.style.display = 'none'; // Hide the welcome message when a file is loaded
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const object = threeMFLoader.parse(e.target.result);
+        }
+    });
+}
 
-            // Create a new group to hold the object
-            const group = new THREE.Group();
-            group.add(object);
-
-            // Compute bounding box for the entire group
-            const box = new THREE.Box3().setFromObject(group);
-            const size = new THREE.Vector3();
-            box.getSize(size);
-
-            // Scale the group to fit within a 5-unit cube
+function load3mfGeometry(geometry) {
+    let size = new THREE.Vector3();
+    geometry.traverse((child) => {
+        if (child.isMesh) {
+            child.geometry.computeBoundingBox();
+            const bbox = child.geometry.boundingBox;
+            bbox.getSize(size);
             const maxDimension = Math.max(size.x, size.y, size.z);
-            const scaleFactor = 5 / maxDimension;
-            group.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-            // Recompute the bounding box after scaling
-            box.setFromObject(group);
+            const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
+            child.geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+            const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
+            const mesh = new THREE.Mesh(child.geometry, material);
+            scene.add(mesh);
+            // Center the geometry
             const center = new THREE.Vector3();
-            box.getCenter(center);
-
-            // Center the group by adjusting its position
-            group.position.sub(center);
-
-            // Add the group to the scene
-            scene.add(group);
-
-            // Adjust the camera to focus on the group
+            bbox.getCenter(center);
+            child.geometry.translate(-center.x, -center.y, -center.z);
             camera.position.set(0, 0, 10);
-            camera.lookAt(new THREE.Vector3(0, 0, 0)); // Look at the origin
-        };
-        reader.readAsArrayBuffer(file);
-    } else {
-        alert('Please drop a valid STL, OBJ, or 3MF file.');
+            camera.lookAt(mesh.position);
+        }
+    })
+}
+
+function loadModel(file) {
+    console.log('Loading model...')
+    const format = file.name.split('.').at(-1).toLowerCase()
+    if (!loaders[format]) {
+        alert('Unsupported file format. Please upload an OBJ, STL, or 3MF file.')
+        return
     }
+    const loader = loaders[format]
+    console.log('Format:', format)
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        let geometry = null
+        try {
+            geometry = loader.parse(e.target.result);
+        } catch (error) {
+            console.error('Error parsing geometry:', error)
+            alert('Error parsing geometry. The file might be corrupted or in an unsupported format.')
+            return
+        }
+
+        switch (format) {
+            case 'obj':
+                loadObjGeometry(geometry)
+                break
+            case 'stl':
+                loadStlGeometry(geometry)
+                break
+            case '3mf':
+                load3mfGeometry(geometry)
+                break
+        }
+        
+        console.log('Model loaded successfully')
+        welcomeMessageContainer.style.display = 'none'
+        modelLoaded = true
+    };
+    reader.onerror = (error) => {
+        console.error('Error reading file:', error)
+        alert('Error reading file. Please try again.')
+    }
+
+    if (format === 'obj') { // OBJ files are text-based
+        reader.readAsText(file)
+    } else {
+        reader.readAsArrayBuffer(file)
+    }
+}
+
+
+renderer.domElement.addEventListener('drop', (event) => {
+    if (modelLoaded) {
+        return
+    }
+    event.preventDefault()
+    const file = event.dataTransfer.files[0]
+
+    loadModel(file)
 });
 
 renderer.domElement.addEventListener('click', () => {
@@ -142,75 +203,10 @@ renderer.domElement.addEventListener('click', () => {
     document.body.appendChild(input);
     input.click();
     input.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file && file.name.endsWith('.stl')) {
-            welcomeMessageContainer.style.display = 'none'; // Hide the message when a file is loaded
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const geometry = loader.parse(e.target.result);
-                geometry.computeBoundingBox();
-                const bbox = geometry.boundingBox;
-                const size = new THREE.Vector3();
-                bbox.getSize(size);
-
-                const maxDimension = Math.max(size.x, size.y, size.z);
-                const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
-                geometry.scale(scaleFactor, scaleFactor, scaleFactor);
-
-                const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
-                const mesh = new THREE.Mesh(geometry, material);
-                scene.add(mesh);
-
-                // Center the geometry
-                const center = new THREE.Vector3();
-                bbox.getCenter(center);
-                geometry.translate(-center.x, -center.y, -center.z);
-
-                camera.position.set(0, 0, 10);
-                camera.lookAt(mesh.position);
-                console.log('Mesh added with scale and center adjustments:', mesh); 
-            };
-            reader.readAsArrayBuffer(file);
-        } else if (file && file.name.endsWith('.obj')) {
-            welcomeMessageContainer.style.display = 'none'; // Hide the message when a file is loaded
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const obj = objLoader.parse(e.target.result);
-                scene.add(obj);
-                camera.position.set(0, 0, 10);
-                camera.lookAt(obj.position);
-            };
-            reader.readAsText(file);
-        } else if (file && file.name.endsWith('.3mf')) {
-            welcomeMessageContainer.style.display = 'none'; // Hide the message when a file is loaded
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const object = threeMFLoader.parse(e.target.result);
-
-                // Compute bounding box
-                const box = new THREE.Box3().setFromObject(object);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-
-                // Scale the object to fit within a 5-unit cube
-                const maxDimension = Math.max(size.x, size.y, size.z);
-                const scaleFactor = 5 / maxDimension;
-                object.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-                // Center the object
-                const center = new THREE.Vector3();
-                box.getCenter(center);
-                object.position.sub(center);
-
-                scene.add(object);
-                camera.position.set(0, 0, 10);
-                camera.lookAt(object.position);
-            };
-            reader.readAsArrayBuffer(file);
-        } else {
-            alert('Please select a valid STL, OBJ, or 3MF file.');
-        }
-        document.body.removeChild(input);
+        const file = event.target.files[0]
+        console.log('Loading file:', file)
+        loadModel(file)
+        document.body.removeChild(input)
     });
     modelLoaded = true
 });
@@ -231,13 +227,13 @@ sideGrid.rotation.z = Math.PI / 2; // Rotate to be vertical, through the camera
 scene.add(sideGrid)
 
 // Reference the checkbox from the HTML
-const gridCheckbox = document.getElementById('grid-checkbox');
+
 gridCheckbox.addEventListener('change', () => {
     frontGrid.visible = gridCheckbox.checked;
     horizontalGrid.visible = gridCheckbox.checked; // Disable horizontal grid as well
 });
 
-const axesCheckbox = document.getElementById('axes-checkbox');
+
 axesCheckbox.addEventListener('change', () => {
     axesHelper.visible = axesCheckbox.checked;
 });
