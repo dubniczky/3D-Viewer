@@ -25,9 +25,27 @@
                 top: 10px;
                 margin-left: -250px;
             }
+
+            /* Sidebar styling */
+            #sidebar {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                padding: 10px;
+                background-color: rgba(255, 255, 255, 0.8);
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            }
+
+            #sidebar label {
+                margin-left: 5px;
+            }
         </style>
     </head>
     <body>
-
+        <div id="sidebar">
+            <input type="checkbox" id="gridCheckbox" checked />
+            <label for="gridCheckbox"> Show Grid</label>
+        </div>
     </body>
 </html>

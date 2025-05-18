@@ -92,30 +92,11 @@ const gridBackground = new THREE.GridHelper(50, 50, 0x444444, 0x444444); // Dark
 gridBackground.rotation.x = Math.PI / 2; // Rotate to lie flat on the background
 scene.add(gridBackground);
 
-// Add a sidebar with a checkbox to toggle the grid
-const sidebar = document.createElement('div');
-sidebar.style.position = 'absolute';
-sidebar.style.top = '10px';
-sidebar.style.left = '10px';
-sidebar.style.padding = '10px';
-sidebar.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-sidebar.style.borderRadius = '5px';
-sidebar.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
-
-const gridCheckbox = document.createElement('input');
-gridCheckbox.type = 'checkbox';
-gridCheckbox.checked = true;
-const gridLabel = document.createElement('label');
-gridLabel.textContent = ' Show Grid';
-gridLabel.style.marginLeft = '5px';
-
+// Reference the checkbox from the HTML
+const gridCheckbox = document.getElementById('gridCheckbox');
 gridCheckbox.addEventListener('change', () => {
     gridBackground.visible = gridCheckbox.checked;
 });
-
-sidebar.appendChild(gridCheckbox);
-sidebar.appendChild(gridLabel);
-document.body.appendChild(sidebar);
 
 // Handle window resizing
 window.addEventListener('resize', () => {
