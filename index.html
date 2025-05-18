@@ -40,6 +40,31 @@
             #sidebar label {
                 margin-left: 5px;
             }
+
+            #welcome-message {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                padding: 30px;
+                background: #444444;
+                color: white;
+                border-radius: 15px;
+                text-align: center;
+                font-family: 'Roboto', Arial, sans-serif;
+                font-size: 18px;
+                line-height: 1.5;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                opacity: 1;
+                pointer-events: none;
+            }
+            #welcome-message h2 {
+                margin: 0px;
+                font-size: 28px;
+                font-weight: bold;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            }
+    
         </style>
     </head>
     <body>
@@ -49,6 +74,10 @@
             <br />
             <input type="checkbox" id="axesCheckbox" checked />
             <label for="axesCheckbox"> Show Axes</label>
+        </div>
+        <div id="welcome-message" style="display: block;">
+            <h2>Welcome to the 3D Object Viewer!</h2><br>
+            Drag a 3D object file here or click to open the file browser
         </div>
     </body>
 </html>

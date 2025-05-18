@@ -44,6 +44,9 @@ controls.maxDistance = 100; // Set maximum zoom distance
 
 // Add drag-and-drop functionality
 const loader = new THREE.STLLoader();
+
+const welcomeMessageContainer = document.getElementById('welcome-message');
+
 renderer.domElement.addEventListener('dragover', (event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
@@ -53,6 +56,7 @@ renderer.domElement.addEventListener('drop', (event) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
     if (file && file.name.endsWith('.stl')) {
+        welcomeMessageContainer.style.display = 'none'; // Hide the welcome message when a file is loaded
         const reader = new FileReader();
         reader.onload = (e) => {
             const geometry = loader.parse(e.target.result);
@@ -82,6 +86,50 @@ renderer.domElement.addEventListener('drop', (event) => {
     } else {
         alert('Please drop a valid STL file.');
     }
+});
+
+renderer.domElement.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.stl';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.click();
+    input.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file && file.name.endsWith('.stl')) {
+            messageDiv.style.display = 'none'; // Hide the message when a file is loaded
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const geometry = loader.parse(e.target.result);
+                geometry.computeBoundingBox();
+                const bbox = geometry.boundingBox;
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+
+                const maxDimension = Math.max(size.x, size.y, size.z);
+                const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
+                geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+
+                const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+
+                // Center the geometry
+                const center = new THREE.Vector3();
+                bbox.getCenter(center);
+                geometry.translate(-center.x, -center.y, -center.z);
+
+                camera.position.set(0, 0, 10);
+                camera.lookAt(mesh.position);
+                console.log('Mesh added with scale and center adjustments:', mesh); 
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('Please select a valid STL file.');
+        }
+        document.body.removeChild(input);
+    });
 });
 
 const axesHelper = new THREE.AxesHelper(5);
