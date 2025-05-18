@@ -1,86 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <!-- Metadata -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="author" content="Sean Bradley" />
-        <title>STL Loader</title>
-        <meta name="description" content="Three.js TypeScript Tutorials by Sean Bradley : https://sbcode.net/threejs" />
+        <meta name="author" content="Richard A. Dubniczky" />
+        <meta name="description" content="A 3D object viewer fully implemented within the browser using Three.js" />
 
-        <script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/STLLoader.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/OBJLoader.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/3MFLoader.js"></script>
+        <meta property="og:title" content="Orbit3D - 3D Object Viewer">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="/assets/embed-image.png">
+        <meta property="og:url" content="https://3dviewer.dubniczky.com/">
+        <meta property="og:description" content="Simple 3D object viewer on the web.">
+        <meta property="og:site_name" content="Orbit3D">
+        <title>Orbit3D</title>
+
+
+        <!-- Style -->
+        <link rel="stylesheet" href="style.css">
+        
+        <!-- Code -->
+        <script defer src="libraries/three.js"></script>
+        <script defer src="libraries/stt-loader.js"></script>
+        <script defer src="libraries/orbit-controller.js"></script>
+        <script defer src="libraries/obj-loader.js"></script>
+        <script defer src="libraries/fflate.js"></script>
+        <script defer src="libraries/3mf-loader.js"></script>
         <script defer src="app.js"></script>
-        <style>
-            body {
-                overflow: hidden;
-                margin: 0px;
-            }
-
-            #progressBar {
-                width: 500px;
-                height: 24px;
-                position: absolute;
-                left: 50%;
-                top: 10px;
-                margin-left: -250px;
-            }
-
-            /* Sidebar styling */
-            #sidebar {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                padding: 10px;
-                background-color: rgba(255, 255, 255, 0.8);
-                border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            }
-
-            #sidebar label {
-                margin-left: 5px;
-            }
-
-            #welcome-message {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                padding: 30px;
-                background: #444444;
-                color: white;
-                border-radius: 15px;
-                text-align: center;
-                font-family: 'Roboto', Arial, sans-serif;
-                font-size: 18px;
-                line-height: 1.5;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                opacity: 1;
-                pointer-events: none;
-            }
-            #welcome-message h2 {
-                margin: 0px;
-                font-size: 28px;
-                font-weight: bold;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            }
-    
-        </style>
     </head>
     <body>
         <div id="sidebar">
-            <input type="checkbox" id="gridCheckbox" checked />
-            <label for="gridCheckbox"> Show Grid</label>
+            <input type="checkbox" id="grid-checkbox" checked />
+            <label for="grid-checkbox"> Show Grid</label>
             <br />
-            <input type="checkbox" id="axesCheckbox" checked />
-            <label for="axesCheckbox"> Show Axes</label>
+            <input type="checkbox" id="axes-checkbox" checked />
+            <label for="axes-checkbox"> Show Axes</label>
         </div>
         <div id="welcome-message" style="display: block;">
-            <h2>Welcome to the 3D Object Viewer!</h2><br>
-            Drag a 3D object file here or click to open the file browser
+            <h2>Welcome to Orbit3D!</h2><br>
+            Drag a 3D object file here or click to open the file browser. <br>
+            <small>Supports: obj, stl, and 3mf files</small>
         </div>
     </body>
 </html>

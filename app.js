@@ -1,12 +1,3 @@
-// app.js
-
-// Include Three.js via a script tag in your HTML file:
-// <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-// Also include the STLLoader, OBJLoader, and ThreeMFLoader scripts:
-// <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/STLLoader.js"></script>
-// <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/OBJLoader.js"></script>
-// <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/3MFLoader.js"></script>
-
 const gridSize = 50 // Unit size for both directions
 const gridDivisions = 50 // Number of divisions in both directions
 const gridColor = 0x444444 // Dark gray color for the grid lines
@@ -240,13 +231,13 @@ sideGrid.rotation.z = Math.PI / 2; // Rotate to be vertical, through the camera
 scene.add(sideGrid)
 
 // Reference the checkbox from the HTML
-const gridCheckbox = document.getElementById('gridCheckbox');
+const gridCheckbox = document.getElementById('grid-checkbox');
 gridCheckbox.addEventListener('change', () => {
     frontGrid.visible = gridCheckbox.checked;
     horizontalGrid.visible = gridCheckbox.checked; // Disable horizontal grid as well
 });
 
-const axesCheckbox = document.getElementById('axesCheckbox');
+const axesCheckbox = document.getElementById('axes-checkbox');
 axesCheckbox.addEventListener('change', () => {
     axesHelper.visible = axesCheckbox.checked;
 });

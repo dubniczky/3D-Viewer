@@ -1,0 +1,52 @@
+body {
+    overflow: hidden;
+    margin: 0px;
+}
+
+#progressBar {
+    width: 500px;
+    height: 24px;
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    margin-left: -250px;
+}
+
+/* Sidebar styling */
+#sidebar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#sidebar label {
+    margin-left: 5px;
+}
+
+#welcome-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    background: #444444;
+    color: white;
+    border-radius: 15px;
+    text-align: center;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    opacity: 1;
+    pointer-events: none;
+}
+#welcome-message h2 {
+    margin: 0px;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
