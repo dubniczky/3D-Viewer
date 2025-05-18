@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="author" content="Richard A. Dubniczky" />
         <meta name="description" content="A 3D object viewer fully implemented within the browser using Three.js" />
+        <link rel="icon" href="/assets/logo.png" type="image/png">
 
         <meta property="og:title" content="Orbit3D - 3D Object Viewer">
         <meta property="og:type" content="website">
@@ -30,6 +31,11 @@
     </head>
     <body>
         <div id="sidebar">
+            <div id="logo-container" style="display: flex; align-items: center; gap: 10px;">
+                <img src="/assets/logo.png" alt="Orbit3D Logo" style="width: 30px; height: 30px;">
+                <h1 style="margin: 0;">Orbit3D</h1>
+            </div>      
+            <p>Drag the mouse to rotate, scroll to zoom.</p>
             <input type="checkbox" id="grid-checkbox" checked />
             <label for="grid-checkbox"> Show Grid</label>
             <br />
@@ -40,6 +46,10 @@
             <label for="wireframe-checkbox"> Wireframe Mode</label>
             <br />
             <button id="camreset-button">Reset Camera</button>
+            <button id="upload-button" class="alternate-button">Upload Object</button>
+            <p>By Richard A. Dubniczky <br>
+            <small>Version 1.0 (<a href="https://github.com/dubniczky/3D-Viewer">source</a>)</small>
+            </p>
         </div>
         <div id="welcome-message" style="display: block;">
             <h2>Welcome to Orbit3D!</h2><br>
