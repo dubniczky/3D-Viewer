@@ -2,12 +2,15 @@
 
 // Include Three.js via a script tag in your HTML file:
 // <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-// Also include the STLLoader script:
+// Also include the STLLoader and OBJLoader scripts:
 // <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/STLLoader.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/OBJLoader.js"></script>
 
 const gridSize = 50 // Unit size for both directions
 const gridDivisions = 50 // Number of divisions in both directions
 const gridColor = 0x444444 // Dark gray color for the grid lines
+
+let modelLoaded = false
 
 document.body.style.margin = 0;
 document.body.style.overflow = 'hidden';
@@ -44,6 +47,7 @@ controls.maxDistance = 100; // Set maximum zoom distance
 
 // Add drag-and-drop functionality
 const loader = new THREE.STLLoader();
+const objLoader = new THREE.OBJLoader();
 
 const welcomeMessageContainer = document.getElementById('welcome-message');
 
@@ -83,22 +87,35 @@ renderer.domElement.addEventListener('drop', (event) => {
             console.log('Mesh added with scale and center adjustments:', mesh); 
         };
         reader.readAsArrayBuffer(file);
+    } else if (file && file.name.endsWith('.obj')) {
+        welcomeMessageContainer.style.display = 'none'; // Hide the welcome message when a file is loaded
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const obj = objLoader.parse(e.target.result);
+            scene.add(obj);
+            camera.position.set(0, 0, 10);
+            camera.lookAt(obj.position);
+        };
+        reader.readAsText(file);
     } else {
-        alert('Please drop a valid STL file.');
+        alert('Please drop a valid STL or OBJ file.');
     }
 });
 
 renderer.domElement.addEventListener('click', () => {
+    if (modelLoaded) {
+        return
+    }
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.stl';
+    input.accept = '.stl, .obj';
     input.style.display = 'none';
     document.body.appendChild(input);
     input.click();
     input.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file && file.name.endsWith('.stl')) {
-            messageDiv.style.display = 'none'; // Hide the message when a file is loaded
+            welcomeMessageContainer.style.display = 'none'; // Hide the message when a file is loaded
             const reader = new FileReader();
             reader.onload = (e) => {
                 const geometry = loader.parse(e.target.result);
@@ -125,11 +142,22 @@ renderer.domElement.addEventListener('click', () => {
                 console.log('Mesh added with scale and center adjustments:', mesh); 
             };
             reader.readAsArrayBuffer(file);
+        } else if (file && file.name.endsWith('.obj')) {
+            welcomeMessageContainer.style.display = 'none'; // Hide the message when a file is loaded
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const obj = objLoader.parse(e.target.result);
+                scene.add(obj);
+                camera.position.set(0, 0, 10);
+                camera.lookAt(obj.position);
+            };
+            reader.readAsText(file);
         } else {
-            alert('Please select a valid STL file.');
+            alert('Please select a valid STL or OBJ file.');
         }
         document.body.removeChild(input);
     });
+    modelLoaded = true
 });
 
 const axesHelper = new THREE.AxesHelper(5);
