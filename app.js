@@ -5,6 +5,10 @@
 // Also include the STLLoader script:
 // <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/STLLoader.js"></script>
 
+const gridSize = 50 // Unit size for both directions
+const gridDivisions = 50 // Number of divisions in both directions
+const gridColor = 0x444444 // Dark gray color for the grid lines
+
 document.body.style.margin = 0;
 document.body.style.overflow = 'hidden';
 
@@ -83,19 +87,23 @@ renderer.domElement.addEventListener('drop', (event) => {
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 
-// Add a grid helper to the scene
-const gridHelper = new THREE.GridHelper(50, 50); // Size 50, divisions 50
-scene.add(gridHelper);
+// Add grids to the scene
+const horizontalGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
+scene.add(horizontalGrid) // Lies flat on the background
 
-// Create a static grid as a background
-const gridBackground = new THREE.GridHelper(50, 50, 0x444444, 0x444444); // Dark gray grid
-gridBackground.rotation.x = Math.PI / 2; // Rotate to lie flat on the background
-scene.add(gridBackground);
+const frontGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
+frontGrid.rotation.x = Math.PI / 2; // Rotate to be vertical in front of the camera
+scene.add(frontGrid)
+
+const sideGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
+sideGrid.rotation.z = Math.PI / 2; // Rotate to be vertical, through the camera
+scene.add(sideGrid)
 
 // Reference the checkbox from the HTML
 const gridCheckbox = document.getElementById('gridCheckbox');
 gridCheckbox.addEventListener('change', () => {
-    gridBackground.visible = gridCheckbox.checked;
+    frontGrid.visible = gridCheckbox.checked;
+    horizontalGrid.visible = gridCheckbox.checked; // Disable horizontal grid as well
 });
 
 const axesCheckbox = document.getElementById('axesCheckbox');
