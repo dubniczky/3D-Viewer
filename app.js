@@ -70,7 +70,7 @@ renderer.domElement.addEventListener('drop', (event) => {
             bbox.getCenter(center);
             geometry.translate(-center.x, -center.y, -center.z);
 
-            camera.position.set(0, -10, 0);
+            camera.position.set(0, 0, 10);
             camera.lookAt(mesh.position);
             console.log('Mesh added with scale and center adjustments:', mesh); 
         };
