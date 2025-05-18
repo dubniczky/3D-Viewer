@@ -98,6 +98,11 @@ gridCheckbox.addEventListener('change', () => {
     gridBackground.visible = gridCheckbox.checked;
 });
 
+const axesCheckbox = document.getElementById('axesCheckbox');
+axesCheckbox.addEventListener('change', () => {
+    axesHelper.visible = axesCheckbox.checked;
+});
+
 // Handle window resizing
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
