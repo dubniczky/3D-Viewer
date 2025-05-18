@@ -23,6 +23,7 @@ const gridCheckbox = document.getElementById('grid-checkbox')
 const axesCheckbox = document.getElementById('axes-checkbox')
 const modelUploader = document.getElementById('model-uploader')
 const wireframeCheckbox = document.getElementById('wireframe-checkbox')
+const resetCameraButton = document.getElementById('camreset-button')
 
 
 // Load Three.js
@@ -258,7 +259,12 @@ wireframeCheckbox.addEventListener('change', () => {
         }
     })
 })
-
+resetCameraButton.addEventListener('click', () => {
+    camera.position.set(...defaultCameraPosition)
+    camera.rotation.set(0, 0, 0)
+    camera.lookAt(new THREE.Vector3(0, 0, 0))
+    controls.update()
+})
 
 // Animation loop
 function animate() {
