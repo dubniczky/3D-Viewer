@@ -4,6 +4,7 @@ const gridDivisions = 50 // Number of divisions in both directions
 const gridColor = 0x444444 // Dark gray color for the grid lines
 const backgroundColor = 0x2e2e2e // Dark gray window clear color
 const lightColor = 0xffffff // White color for the light
+const modelMeshColor = 0x808080 // Light gray color for the model mesh
 const defaultCameraPosition = [0, 0, 10]
 const diffuseLightDirection = [1, 1, 1]
 
@@ -18,6 +19,7 @@ let diffuseLightIntensity = 1.5
 const welcomeMessageContainer = document.getElementById('welcome-message')
 const gridCheckbox = document.getElementById('grid-checkbox')
 const axesCheckbox = document.getElementById('axes-checkbox')
+const modelUploader = document.getElementById('model-uploader')
 
 
 // Load Three.js
@@ -29,12 +31,31 @@ document.body.appendChild(renderer.domElement)
 renderer.setClearColor(backgroundColor)
 camera.position.set(...defaultCameraPosition)
 
+
 // Add lighting
 const ambientLight = new THREE.AmbientLight(lightColor, ambientLightIntensity)
 scene.add(ambientLight)
 const diffuseLight = new THREE.DirectionalLight(lightColor, diffuseLightIntensity)
 diffuseLight.position.set(...diffuseLightDirection).normalize()
 scene.add(diffuseLight)
+
+
+// Add axes helper lines to the scene
+const axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
+
+
+// Add grids to the scene
+const horizontalGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
+scene.add(horizontalGrid) // Lies flat on the background
+
+const frontGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
+frontGrid.rotation.x = Math.PI / 2; // Rotate to be vertical in front of the camera
+scene.add(frontGrid)
+
+const sideGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
+sideGrid.rotation.z = Math.PI / 2; // Rotate to be vertical, through the camera
+scene.add(sideGrid)
 
 
 // Add orbit controls for camera movement
@@ -52,59 +73,57 @@ const loaders = {
     'stl': new THREE.STLLoader(),
     '3mf': new THREE.ThreeMFLoader()
 }
+// Set up model uploader accepted formats
+modelUploader.accept = Object.keys(loaders).map(x => '.' + x).join(', ')
 
 
-renderer.domElement.addEventListener('dragover', (event) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'copy'
-})
-
+// Geometry loaders
 function loadStlGeometry(geometry) {
-    geometry.computeBoundingBox();
-    const bbox = geometry.boundingBox;
-    const size = new THREE.Vector3();
-    bbox.getSize(size);
+    geometry.computeBoundingBox()
+    const bbox = geometry.boundingBox
+    const size = new THREE.Vector3()
+    bbox.getSize(size)
 
-    const maxDimension = Math.max(size.x, size.y, size.z);
-    const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
-    geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+    const maxDimension = Math.max(size.x, size.y, size.z)
+    const scaleFactor = 5 / maxDimension // Scale to fit within a 5-unit cube
+    geometry.scale(scaleFactor, scaleFactor, scaleFactor)
 
-    const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    const material = new THREE.MeshStandardMaterial({ color: modelMeshColor })
+    const mesh = new THREE.Mesh(geometry, material)
+    scene.add(mesh)
 
     // Center the geometry
-    const center = new THREE.Vector3();
-    bbox.getCenter(center);
-    geometry.translate(-center.x, -center.y, -center.z);
+    const center = new THREE.Vector3()
+    bbox.getCenter(center)
+    geometry.translate(-center.x, -center.y, -center.z)
 
-    camera.position.set(0, 0, 10);
-    camera.lookAt(mesh.position);
+    camera.position.set(...defaultCameraPosition)
+    camera.lookAt(mesh.position)
 }
 
 function loadObjGeometry(geometry) {
     geometry.traverse((child) => {
         if (child.isMesh) {
-            child.geometry.computeBoundingBox();
-            const bbox = child.geometry.boundingBox;
-            const size = new THREE.Vector3();
-            bbox.getSize(size);
+            child.geometry.computeBoundingBox()
+            const bbox = child.geometry.boundingBox
+            const size = new THREE.Vector3()
+            bbox.getSize(size)
 
-            const maxDimension = Math.max(size.x, size.y, size.z);
-            const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
-            child.geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+            const maxDimension = Math.max(size.x, size.y, size.z)
+            const scaleFactor = 5 / maxDimension // Scale to fit within a 5-unit cube
+            child.geometry.scale(scaleFactor, scaleFactor, scaleFactor)
 
-            const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
-            const mesh = new THREE.Mesh(child.geometry, material);
-            scene.add(mesh);
+            const material = new THREE.MeshStandardMaterial({ color: modelMeshColor })
+            const mesh = new THREE.Mesh(child.geometry, material)
+            scene.add(mesh)
 
             // Center the geometry
-            const center = new THREE.Vector3();
-            bbox.getCenter(center);
-            child.geometry.translate(-center.x, -center.y, -center.z);
+            const center = new THREE.Vector3()
+            bbox.getCenter(center)
+            child.geometry.translate(-center.x, -center.y, -center.z)
 
-            camera.position.set(0, 0, 10);
-            camera.lookAt(mesh.position);
+            camera.position.set(...defaultCameraPosition)
+            camera.lookAt(mesh.position)
         }
     });
 }
@@ -113,25 +132,29 @@ function load3mfGeometry(geometry) {
     let size = new THREE.Vector3();
     geometry.traverse((child) => {
         if (child.isMesh) {
-            child.geometry.computeBoundingBox();
-            const bbox = child.geometry.boundingBox;
-            bbox.getSize(size);
-            const maxDimension = Math.max(size.x, size.y, size.z);
-            const scaleFactor = 5 / maxDimension; // Scale to fit within a 5-unit cube
-            child.geometry.scale(scaleFactor, scaleFactor, scaleFactor);
-            const material = new THREE.MeshStandardMaterial({ color: 0x808080 });
-            const mesh = new THREE.Mesh(child.geometry, material);
-            scene.add(mesh);
-            // Center the geometry
-            const center = new THREE.Vector3();
-            bbox.getCenter(center);
-            child.geometry.translate(-center.x, -center.y, -center.z);
-            camera.position.set(0, 0, 10);
-            camera.lookAt(mesh.position);
+            child.geometry.computeBoundingBox()
+            const bbox = child.geometry.boundingBox
+            bbox.getSize(size)
+
+            const maxDimension = Math.max(size.x, size.y, size.z)
+            const scaleFactor = 5 / maxDimension // Scale to fit within a 5-unit cube
+            child.geometry.scale(scaleFactor, scaleFactor, scaleFactor)
+
+            const material = new THREE.MeshStandardMaterial({ color: modelMeshColor })
+            const mesh = new THREE.Mesh(child.geometry, material)
+            scene.add(mesh)
+
+            const center = new THREE.Vector3()
+            bbox.getCenter(center)
+            child.geometry.translate(-center.x, -center.y, -center.z)
+            camera.position.set(...defaultCameraPosition)
+            camera.lookAt(mesh.position)
         }
     })
 }
 
+
+// Model loader
 function loadModel(file) {
     console.log('Loading model...')
     const format = file.name.split('.').at(-1).toLowerCase()
@@ -182,73 +205,55 @@ function loadModel(file) {
 }
 
 
-renderer.domElement.addEventListener('drop', (event) => {
-    if (modelLoaded) {
-        return
-    }
+// Generic Events
+renderer.domElement.addEventListener('dragover', (event) => {
     event.preventDefault()
-    const file = event.dataTransfer.files[0]
-
-    loadModel(file)
-});
-
+    event.dataTransfer.dropEffect = 'copy' // Explicitly show this is a copy on the mouse
+})
+renderer.domElement.addEventListener('drop', (event) => {
+    event.preventDefault()
+    if (event.dataTransfer.files.length !== 1) {
+        alert('Only a single file is supported.')
+        return
+    }
+    loadModel(event.dataTransfer.files[0])
+})
 renderer.domElement.addEventListener('click', () => {
+    // If a model is loaded, do not open the file dialog on click
+    // It would open constantly on dragging the model
     if (modelLoaded) {
         return
     }
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.stl, .obj, .3mf';
-    input.style.display = 'none';
-    document.body.appendChild(input);
-    input.click();
-    input.addEventListener('change', (event) => {
-        const file = event.target.files[0]
-        console.log('Loading file:', file)
-        loadModel(file)
-        document.body.removeChild(input)
-    });
-    modelLoaded = true
-});
-
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
-
-// Add grids to the scene
-const horizontalGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
-scene.add(horizontalGrid) // Lies flat on the background
-
-const frontGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
-frontGrid.rotation.x = Math.PI / 2; // Rotate to be vertical in front of the camera
-scene.add(frontGrid)
-
-const sideGrid = new THREE.GridHelper(gridSize, gridDivisions, gridColor, gridColor)
-sideGrid.rotation.z = Math.PI / 2; // Rotate to be vertical, through the camera
-scene.add(sideGrid)
-
-// Reference the checkbox from the HTML
-
-gridCheckbox.addEventListener('change', () => {
-    frontGrid.visible = gridCheckbox.checked;
-    horizontalGrid.visible = gridCheckbox.checked; // Disable horizontal grid as well
-});
-
-
-axesCheckbox.addEventListener('change', () => {
-    axesHelper.visible = axesCheckbox.checked;
-});
-
-// Handle window resizing
+    modelUploader.click()
+})
+modelUploader.addEventListener('change', (event) => {
+    if (event.target.files.length !== 1) {
+        alert('Only a single file is supported.')
+        return
+    }
+    loadModel(event.target.files[0])
+})
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
+    renderer.setSize(window.innerWidth, window.innerHeight)
 });
+
+
+// Sidebar control events
+gridCheckbox.addEventListener('change', () => {
+    frontGrid.visible = gridCheckbox.checked
+    horizontalGrid.visible = gridCheckbox.checked // Disable horizontal grid as well
+})
+axesCheckbox.addEventListener('change', () => {
+    axesHelper.visible = axesCheckbox.checked
+})
+
 
 // Animation loop
 function animate() {
-    requestAnimationFrame(animate);
-    controls.update(); // Update controls
-    renderer.render(scene, camera);
+    requestAnimationFrame(animate)
+    controls.update() // Update controls
+    renderer.render(scene, camera)
 }
-animate();
+animate()
